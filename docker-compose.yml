@@ -1,0 +1,68 @@
+services:
+  mysql:
+    image: mariadb:10.11
+    container_name: nwn-mysql
+    env_file:
+      - ./secrets/mysql.env
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -h 127.0.0.1 -u$$MARIADB_USER -p$$MARIADB_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  nwn:
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    #   target: runtime
+    image: ghcr.io/kucik/nwn-runtime:latest
+    platform: linux/386
+    container_name: nwn-jessie32
+    depends_on:
+      mysql:
+        condition: service_healthy
+    working_dir: /home/nwn
+    volumes:
+      - ./nwn/database:/home/nwn/database
+      - ./nwn/logs.0:/home/nwn/logs.0
+      - ./nwn/scripts:/home/nwn/scripts:ro
+      - ./nwn/hak:/home/nwn/hak:ro
+      - ./nwn/tlk:/home/nwn/tlk:ro
+      - ./nwn/erf:/home/nwn/erf:ro
+      - ./nwn/localvault:/home/nwn/localvault:ro
+      - ./nwn/modules:/home/nwn/modules:ro
+      - ./compiled:/home/nwn/nwnx2
+      - ./secrets/mysql.env:/home/nwn/secrets/mysql.env:ro
+      - ./secrets/nwn.env:/home/nwn/secrets/nwn.env:ro
+      - ./secrets/nwnx2.ini:/home/nwn/nwnx2.ini:ro
+    stdin_open: true
+    tty: true
+    command: ["/bin/bash"]
+
+  nwnx-build:
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    #   target: builder
+    image: ghcr.io/kucik/nwn-builder:latest
+    platform: linux/386
+    container_name: nwn-jessie32-build
+    working_dir: /home/nwn/src
+    volumes:
+      - ./compiled:/home/nwn/compiled
+    stdin_open: true
+    tty: true
+#    command: ["/bin/bash"]
+    command: ["/usr/local/bin/build-nwnx.sh"]
+
+## Moved from ./ to ./scripts
+# nw_deamon.sh
+# renice.sh
+# repository_sync.sh
+
+volumes:
+  mysql-data:
+

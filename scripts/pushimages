@@ -1,0 +1,6 @@
+#!/bin/bash
+
+docker push ghcr.io/kucik/nwn-runtime:2026-04-09
+docker push ghcr.io/kucik/nwn-runtime:latest
+docker push ghcr.io/kucik/nwn-builder:2026-04-09
+docker push ghcr.io/kucik/nwn-builder:latest

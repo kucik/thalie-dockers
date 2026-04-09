@@ -1,0 +1,11 @@
+secrets/*.env
+secrets/*.ini
+
+# Keep nwn directory structure only (track .gitkeep placeholders)
+nwn/**
+!nwn/**/
+!nwn/**/.gitkeep
+
+# Track selected runtime scripts
+!nwn/start.sh
+!nwn/scripts/**
